@@ -26,9 +26,25 @@ const limiter = rateLimit({
     status: 429,
     error: 'Too many requests. Please try again later.',
   },
+  keyGenerator: (req, res) => {
+    return (
+      req.ip ||
+      req.headers['x-forwarded-for'] ||
+      req.connection?.remoteAddress ||
+      'internal-service' // fallback key
+    );
+  },
 });
 
-app.use(limiter); // Apply rate limit globally (or only to /api/services if preferred)
+// app.use(limiter); // Apply rate limit globally (or only to /api/services if preferred)
+
+app.use((req, res, next) => {
+  if (req.headers['x-internal-service'] === 'true') {
+    console.log(req.headers)
+    return next(); // Skip rate limiting for trusted internal services
+  }
+  return limiter(req, res, next); // Apply limiter otherwise
+});
 
 // Main route
 app.use('/api/services', servicesRoute);
