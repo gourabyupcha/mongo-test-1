@@ -1,7 +1,6 @@
 {
   "name": "mongo-test",
   "module": "server.js",
-  "type": "module",
   "devDependencies": {
     "@types/bun": "latest"
   },
